@@ -1,0 +1,14 @@
+{
+    "domain": "seeed_studio",
+    "name": "Seeed Studio",
+    "codeowners": ["@QingWind6"],
+    "config_flow": true,
+    "dependencies": ["mqtt"],
+    "documentation": "https://www.example.com",
+    "issue_tracker": "",
+    "iot_class": "local_push",
+    "requirements": [],
+    "icon": "/config/custom_components/detailed_hello_world_push/Logo.png",
+    "version": "1.0"
+  }
+  
