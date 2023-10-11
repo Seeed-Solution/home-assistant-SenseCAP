@@ -134,7 +134,7 @@ class MyDevice(Entity):
             "identifiers": {(DOMAIN, self._id)},
             "name": self._name,
             "sw_version": "1.0",
-            "model": "IAG Model",
+            "model": "SenseCAP",
             "manufacturer": "SenseCAP",
         }
 
@@ -174,7 +174,7 @@ class MySensor(Entity):
             "identifiers": {(DOMAIN, self.device._id)},
             "name": self.device._name,
             "sw_version": "1.0",
-            "model": "IAG Model",
+            "model": "SenseCAP",
             "manufacturer": "SenseCAP",
         }
 
