@@ -1,5 +1,6 @@
 # home-assistant-SenseCAP
 The home-assistant integration for SenseCAP LoRaWAN sensors
+<<<<<<< HEAD
 
 ## Installation
 
@@ -19,3 +20,5 @@ The intergration configuration takes only a few steps:
 2. Click **notifications** at the bottom of the left, wait for the new device identification notification to pop up, click **Check it out** to jump to the device management interface.
 
 3. Complete all configurations for the integration
+=======
+>>>>>>> 1da35e3dc3db0bf6a1b991c0f486df4f53bae986
