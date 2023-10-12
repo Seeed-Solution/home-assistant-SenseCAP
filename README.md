@@ -1,5 +1,5 @@
-# home-assistant-SenseCAP
-The home-assistant integration for SenseCAP LoRaWAN sensors
+# The home-assistant integration for SenseCAP LoRaWAN sensors
+<img src=icon.png/>
 
 ## Installation
 
