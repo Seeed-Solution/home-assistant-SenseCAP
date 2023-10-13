@@ -16,8 +16,14 @@ PLATFORMS: list[str] = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     mqtt_topic = entry.data["command_topic"]
+    user_name = entry.data["username"]
+    user_passwd = entry.data["password"]
+
 
     hass.data.setdefault(DOMAIN, {})["mqtt_topic"] = mqtt_topic
+    hass.data.setdefault(DOMAIN, {})["user_name"] = user_name
+    hass.data.setdefault(DOMAIN, {})["user_passwd"] = user_passwd
+    # hass.data.setdefault(DOMAIN, {})["mqtt_port"] = mqtt_port
     hass.data.setdefault(DOMAIN, {})["dev_eui"] = []
     hass.data.setdefault(DOMAIN, {})["entities"] = {}
 
