@@ -2,14 +2,19 @@ import json
 import concurrent.futures
 import logging
 import re
+import asyncio
 
 from homeassistant.components import mqtt
+import paho.mqtt.client as mqtt
 from homeassistant.helpers.entity import Entity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
+
+DEFAULT_BROKER = "192.168.121.131"
+DEFAULT_PORT = 1883
 
 from .const import DOMAIN
 
@@ -24,77 +29,107 @@ async def async_setup_entry(
     entities = hass.data.setdefault(DOMAIN, {})["entities"]
     devices_eui = hass.data.setdefault(DOMAIN, {})["dev_eui"]
 
-    # MQTT数据处理
-    async def message_received(msg: mqtt.ReceiveMessage) -> None:
-        existing_entities = await get_sensor_entity_ids(hass)
-        payload = json.loads(msg.payload)
-        # 判断payload关键字
-        if "deviceInfo" not in payload:
-            return
-        # 根据devEui来判断设备是否来自SenseCAP
-        if payload["deviceInfo"]["devEui"][:6] != "2cf7f1":
-            return 
+    username = hass.data.setdefault(DOMAIN, {})["user_name"]
+    password = hass.data.setdefault(DOMAIN, {})["user_passwd"]
 
-        dev_eui = payload["deviceInfo"]["devEui"]
-        _LOGGER.info(len(payload["object"]["messages"]))
+    message_queue = asyncio.Queue()
 
-        if len(payload["object"]["messages"]) > 1:
-            messages = payload["object"]["messages"]
-            dev_messages = [messages]
-        elif len(payload["object"]["messages"]) == 1:
-            dev_messages = payload["object"]["messages"]
-        else:
-            dev_messages = []
+    def message_received(client, userdata, msg):
+        """处理接收到的 MQTT 消息."""
+        message_queue.put_nowait(msg.payload.decode("utf-8"))
 
-        _LOGGER.info(dev_messages)
+    client = mqtt.Client()
+    if username and password:
+        client.username_pw_set(username, password)
+    client.on_message = message_received
 
-        # 检查设备是否存在
-        if dev_eui not in devices_eui:
-            _LOGGER.info(f"Creating new device with dev_eui: {dev_eui}")
-            #发送通知
-            persistent_notification.async_create(
-                hass,
-                f"New devices discovered！ \n" +
-                f"Device EUI： {dev_eui} \n" + 
-                f"[Check it out](/config/integrations/integration/sensecap)",
-                "SenseCAP"
-                )
-            new_device = MyDevice(hass, dev_eui)
-            devices_eui.append(dev_eui)
-            # 创建实体并状态赋值
-            for i in range(len(dev_messages[0])):
-                sensor_type = dev_messages[0][i]["type"]
-                if("measurementValue" not in dev_messages[0][i]):
-                    pass
-                new_state = dev_messages[0][i]["measurementValue"]
+    # 连接到 MQTT broker
+    client.connect(DEFAULT_BROKER, DEFAULT_PORT)
+    client.subscribe(mqtt_topic)
 
-                new_sensor = MySensor(hass, new_device, sensor_type)
-                new_sensor._state = new_state
+    # 开始循环以接收消息
+    client.loop_start()
+    # # MQTT数据处理
 
-                if dev_eui not in entities:
-                    entities[dev_eui] = {}
+    # 创建异步任务，持续监听消息队列
+    async def message_consumer():
+        while True:
+            payload = await message_queue.get()
+            try:
+                payload = json.loads(payload)
+                existing_entities = await get_sensor_entity_ids(hass)
+                # 判断payload关键字
+                if "deviceInfo" not in payload:
+                    return
+                # 根据devEui来判断设备是否来自SenseCAP
+                if payload["deviceInfo"]["devEui"][:6] != "2cf7f1":
+                    return 
 
-                # 将实体连同设备信息放入实体中，方便后续更新状态
-                async_add_entities([new_sensor])
-                entities[dev_eui][sensor_type] = new_sensor
+                dev_eui = payload["deviceInfo"]["devEui"]
+                _LOGGER.info(len(payload["object"]["messages"]))
 
-        _LOGGER.info(f"entities:{entities}")
-        _LOGGER.info(f"devices_eui:{devices_eui}")
-        for i in range(len(dev_messages[0])):
-            sensor_type = dev_messages[0][i]["type"]
-            if("measurementValue" not in dev_messages[0][i]):
-                pass
-            new_state = dev_messages[0][i]["measurementValue"]
-            
-            for dev_eui in devices_eui:
-                if dev_eui not in entities:
-                    devices_eui.remove(dev_eui)
-                    pass
+                if len(payload["object"]["messages"]) > 1:
+                    messages = payload["object"]["messages"]
+                    dev_messages = [messages]
+                elif len(payload["object"]["messages"]) == 1:
+                    dev_messages = payload["object"]["messages"]
+                else:
+                    dev_messages = []
 
-                if sensor_type in entities[dev_eui]:
-                    entity = entities[dev_eui][sensor_type]
-                    entity._state = new_state
-                    entity.async_schedule_update_ha_state()
+                _LOGGER.info(dev_messages)
+
+                # 检查设备是否存在
+                if dev_eui not in devices_eui:
+                    _LOGGER.info(f"Creating new device with dev_eui: {dev_eui}")
+                    #发送通知
+                    persistent_notification.async_create(
+                        hass,
+                        f"New devices discovered！ \n" +
+                        f"Device EUI： {dev_eui} \n" + 
+                        f"[Check it out](/config/integrations/integration/sensecap)",
+                        "SenseCAP"
+                        )
+                    new_device = MyDevice(hass, dev_eui)
+                    devices_eui.append(dev_eui)
+                    # 创建实体并状态赋值
+                    for i in range(len(dev_messages[0])):
+                        sensor_type = dev_messages[0][i]["type"]
+                        if("measurementValue" not in dev_messages[0][i]):
+                            pass
+                        new_state = dev_messages[0][i]["measurementValue"]
+
+                        new_sensor = MySensor(hass, new_device, sensor_type)
+                        new_sensor._state = new_state
+
+                        if dev_eui not in entities:
+                            entities[dev_eui] = {}
+
+                        # 将实体连同设备信息放入实体中，方便后续更新状态
+                        async_add_entities([new_sensor])
+                        entities[dev_eui][sensor_type] = new_sensor
+
+                _LOGGER.info(f"entities:{entities}")
+                _LOGGER.info(f"devices_eui:{devices_eui}")
+                for i in range(len(dev_messages[0])):
+                    sensor_type = dev_messages[0][i]["type"]
+                    if("measurementValue" not in dev_messages[0][i]):
+                        pass
+                    new_state = dev_messages[0][i]["measurementValue"]
+                    
+                    for dev_eui in devices_eui:
+                        if dev_eui not in entities:
+                            devices_eui.remove(dev_eui)
+                            pass
+
+                        if sensor_type in entities[dev_eui]:
+                            entity = entities[dev_eui][sensor_type]
+                            entity._state = new_state
+                            entity.async_schedule_update_ha_state()
+
+            except Exception as e:
+                _LOGGER.error("处理 MQTT 消息时出错：%s", str(e))
+            finally:
+                message_queue.task_done()
 
 
 
@@ -102,8 +137,8 @@ async def async_setup_entry(
         sensor_entity_ids = hass.states.async_entity_ids("sensor")
         return sensor_entity_ids
 
-
-    await hass.components.mqtt.async_subscribe(mqtt_topic, message_received)
+    asyncio.create_task(message_consumer())
+    # await hass.components.mqtt.async_subscribe(mqtt_topic, message_received)
 
     return True
 
