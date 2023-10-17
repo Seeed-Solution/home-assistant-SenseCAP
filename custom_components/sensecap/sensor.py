@@ -13,7 +13,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
 
-# DEFAULT_BROKER = "192.168.121.131"
+measurement_pair = {
+    '4097':'Air Temperature','4098':'Air Humidity','4099':'Light Intensity','4100':'CO2'
+    ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan'
+}
 DEFAULT_PORT = 1883
 
 from .const import DOMAIN
@@ -94,7 +97,8 @@ async def async_setup_entry(
                     devices_eui.append(dev_eui)
                     # 创建实体并状态赋值
                     for i in range(len(dev_messages[0])):
-                        sensor_type = dev_messages[0][i]["type"]
+                        sensor_type = str(int(float(dev_messages[0][i]["measurementId"])))
+                        sensor_type = measurement_pair.get(sensor_type)
                         if("measurementValue" not in dev_messages[0][i]):
                             pass
                         new_state = dev_messages[0][i]["measurementValue"]
@@ -112,7 +116,8 @@ async def async_setup_entry(
                 _LOGGER.info(f"entities:{entities}")
                 _LOGGER.info(f"devices_eui:{devices_eui}")
                 for i in range(len(dev_messages[0])):
-                    sensor_type = dev_messages[0][i]["type"]
+                    sensor_type = str(int(float(dev_messages[0][i]["measurementId"])))
+                    sensor_type = measurement_pair.get(sensor_type)
                     if("measurementValue" not in dev_messages[0][i]):
                         pass
                     new_state = dev_messages[0][i]["measurementValue"]
