@@ -1,9 +1,5 @@
 # The home-assistant integration for SenseCAP LoRaWAN sensors
-<<<<<<< HEAD
-<img src=icon.png/>
-=======
 <img src=https://raw.githubusercontent.com/Seeed-Solution/home-assistant-SenseCAP/main/icon.png>
->>>>>>> 389cc92554972b6e46e93c86199f62e83fd5afa7
 
 ## Installation
 
