@@ -53,8 +53,4 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=AUTH_SCHEMA,
             errors=errors or {},
-<<<<<<< HEAD
         )
-=======
-        )
->>>>>>> 389cc92554972b6e46e93c86199f62e83fd5afa7
