@@ -16,6 +16,7 @@ PLATFORMS: list[str] = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     mqtt_topic = entry.data["command_topic"]
+    host = entry.data["host"]
     user_name = entry.data["username"]
     user_passwd = entry.data["password"]
 
@@ -23,7 +24,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})["mqtt_topic"] = mqtt_topic
     hass.data.setdefault(DOMAIN, {})["user_name"] = user_name
     hass.data.setdefault(DOMAIN, {})["user_passwd"] = user_passwd
-    # hass.data.setdefault(DOMAIN, {})["mqtt_port"] = mqtt_port
+    hass.data.setdefault(DOMAIN, {})["mqtt_host"] = host
+
     hass.data.setdefault(DOMAIN, {})["dev_eui"] = []
     hass.data.setdefault(DOMAIN, {})["entities"] = {}
 
@@ -35,5 +37,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop("command_topic", None)
+
 
     return unload_ok
