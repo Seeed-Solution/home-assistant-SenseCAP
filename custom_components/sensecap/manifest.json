@@ -1,13 +1,12 @@
 {
-    "domain": "sensecap",
-    "name": "Seeed Studio-SenseCAP",
-    "codeowners": ["@QingWind6"],
-    "config_flow": true,
-    "dependencies": ["mqtt"],
-    "documentation": "https://www.example.com",
-    "issue_tracker": "",
-    "iot_class": "local_push",
-    "requirements": [],
-    "version": "1.0"
-  }
-  
+  "domain": "senseeeeee",
+  "name": "SenseCAP",
+  "codeowners": ["@QingWind6"],
+  "config_flow": true,
+  "dependencies": ["mqtt"],
+  "documentation": "https://github.com/Seeed-Solution/home-assistant-SenseCAP",
+  "issue_tracker": "",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "1.0"
+}

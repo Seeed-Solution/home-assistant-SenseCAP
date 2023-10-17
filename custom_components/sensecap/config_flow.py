@@ -1,107 +1,49 @@
-# """Config flow for Hello World integration."""
-# from __future__ import annotations
-
-# import logging
-# from typing import Any
-
-# import voluptuous as vol
-
-# from homeassistant import config_entries, exceptions
-# from homeassistant.core import HomeAssistant
-
-# from .const import (
-#     DOMAIN,
-#     CONF_COMMAND_TOPIC
-# )
-
-# _LOGGER = logging.getLogger(__name__)
-
-# DATA_SCHEMA = vol.Schema({("command_topic"): str},
-# )
-
-
-# async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-
-#     return {"title": data["command_topic"]}
-
-
-# class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-#     VERSION = 1
-#     topic: str
-
-#     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
-
-#     async def async_step_user(self, user_input=None):
-#         errors = {}
-#         if user_input is not None:
-#             try:
-#                 self.topic = user_input[CONF_COMMAND_TOPIC]
-
-#                 data={
-#                 CONF_COMMAND_TOPIC: self.topic,
-#                 }
-
-#                 return self.async_create_entry(title=self.topic, data=data)
-            
-#             except Exception as e:
-#                 # 处理异常，可以记录日志或者返回适当的错误信息给用户
-#                 _LOGGER.error(f"An unexpected error occurred: {e}")
-#                 errors["base"] = "unknown"
-
-#         return self.async_show_form(
-#             step_id="user",
-#             data_schema=vol.Schema(
-#                 {
-#                     vol.Required(CONF_COMMAND_TOPIC, default="application/#"): str,
-#                 }
-#             ),
-#             errors=errors or {},
-#         )
-
-"""Config flow for Hello World integration."""
-from __future__ import annotations
-
+# from copy import deepcopy
 import logging
-from typing import Any
+from typing import Any, Dict, Optional
+
+from homeassistant import config_entries, core
+from homeassistant.const import CONF_ACCESS_TOKEN,CONF_USERNAME,CONF_PASSWORD,CONF_HOST,CONF_URL
+from homeassistant.core import callback
+import homeassistant.helpers.config_validation as cv
 
 import voluptuous as vol
 
-from homeassistant import config_entries, exceptions
-from homeassistant.core import HomeAssistant
-
-from .const import (
-    DOMAIN,
-    CONF_COMMAND_TOPIC
-)
+from .const import CONF_COMMAND_TOPIC, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-DATA_SCHEMA = vol.Schema({("command_topic"): str},
+AUTH_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_COMMAND_TOPIC, default="application/#"): cv.string,
+        vol.Required(CONF_HOST): cv.string,
+        vol.Required(CONF_USERNAME): cv.string, 
+        vol.Required(CONF_PASSWORD): cv.string,
+    }
 )
-
-
-async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    return {"title": data["command_topic"]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     topic: str  # 添加 topic 属性
-
-    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
-
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
             try:
-                self.topic = user_input[CONF_COMMAND_TOPIC]
+                mqtt_topic = user_input[CONF_COMMAND_TOPIC]
+                mqtt_host = user_input[CONF_HOST]
+                user_name = user_input.get(CONF_USERNAME)
+                user_passwd = user_input.get(CONF_PASSWORD)
 
-                data={
-                    CONF_COMMAND_TOPIC: self.topic,
+                data = {
+                    CONF_COMMAND_TOPIC: mqtt_topic,
+                    CONF_HOST: mqtt_host,
+                    CONF_USERNAME: user_name,
+                    CONF_PASSWORD: user_passwd,
                 }
 
-                return self.async_create_entry(title=self.topic, data=data)
-            
+                return self.async_create_entry(title="SenseCAP", data=data)
+
             except Exception as e:
                 # 处理异常，可以记录日志或者返回适当的错误信息给用户
                 _LOGGER.error(f"An unexpected error occurred: {e}")
@@ -109,11 +51,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(CONF_COMMAND_TOPIC, default="application/#"): str,
-                }
-            ),
+            data_schema=AUTH_SCHEMA,
             errors=errors or {},
-            description_placeholders={"command_topic": getattr(self, 'topic', "")},
         )

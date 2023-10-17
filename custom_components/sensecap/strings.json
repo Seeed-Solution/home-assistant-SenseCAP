@@ -1,0 +1,20 @@
+{
+  "config": {
+    "error": {
+      "auth": "The auth token provided is not valid.",
+      "invalid_path": "The path provided is not valid. Should be in the format `user/repo-name`."
+    },
+    "step": {
+      "user": {
+        "data": {
+          "command_topic": "MQTT TOPIC",
+          "host": "MQTT BROKER",
+          "username": "MQTT USERNAME",
+          "password": "MQTT PASSWORD"
+        },
+        "description": "Enter your MQTT information.",
+        "title": "SenseCAP"
+      }
+    }
+  }
+}
