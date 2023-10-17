@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
 
-DEFAULT_BROKER = "192.168.121.131"
+# DEFAULT_BROKER = "192.168.121.131"
 DEFAULT_PORT = 1883
 
 from .const import DOMAIN
@@ -29,6 +29,7 @@ async def async_setup_entry(
     entities = hass.data.setdefault(DOMAIN, {})["entities"]
     devices_eui = hass.data.setdefault(DOMAIN, {})["dev_eui"]
 
+    mqtt_host = hass.data.setdefault(DOMAIN, {})["mqtt_host"]
     username = hass.data.setdefault(DOMAIN, {})["user_name"]
     password = hass.data.setdefault(DOMAIN, {})["user_passwd"]
 
@@ -44,7 +45,7 @@ async def async_setup_entry(
     client.on_message = message_received
 
     # 连接到 MQTT broker
-    client.connect(DEFAULT_BROKER, DEFAULT_PORT)
+    client.connect(mqtt_host, DEFAULT_PORT)
     client.subscribe(mqtt_topic)
 
     # 开始循环以接收消息
