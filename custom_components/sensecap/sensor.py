@@ -15,7 +15,9 @@ from homeassistant.components import persistent_notification
 
 measurement_pair = {
     '4097':'Air Temperature','4098':'Air Humidity','4099':'Light Intensity','4100':'CO2'
-    ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan'
+    ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan',
+    '4190':'UV Index','4105':'Wind Speed','4104':'Wind Direction Sensor','4113':'Rain Gauge','4101':'Barometric Pressure',
+    '4102':'Soil Temperature','4103':'Soil Moisture','4108':'Electrical Conductivity'
 }
 DEFAULT_PORT = 1883
 
@@ -70,7 +72,7 @@ async def async_setup_entry(
                 #     return 
 
                 dev_eui = payload["deviceInfo"]["devEui"]
-                _LOGGER.info(len(payload["object"]["messages"]))
+                # _LOGGER.info(len(payload["object"]["messages"]))
 
                 if len(payload["object"]["messages"]) > 1:
                     messages = payload["object"]["messages"]
@@ -80,14 +82,10 @@ async def async_setup_entry(
                 else:
                     dev_messages = []
 
-                _LOGGER.info(dev_messages)
-                num_of_brackets = count_nested_lists(dev_messages)
-                _LOGGER.info(num_of_brackets)
-                if num_of_brackets == 1:
-                    dev_messages = [dev_messages]
-
-
-                # 检查设备是否存在
+                dev_messages = flatten_nested_list(dev_messages)
+                _LOGGER.info(len(dev_messages))
+                _LOGGER.info((dev_messages))
+                # # 检查设备是否存在
                 if dev_eui not in devices_eui:
                     _LOGGER.info(f"Creating new device with dev_eui: {dev_eui}")
                     #发送通知
@@ -101,12 +99,12 @@ async def async_setup_entry(
                     new_device = MyDevice(hass, dev_eui)
                     devices_eui.append(dev_eui)
                     # 创建实体并状态赋值
-                    for i in range(len(dev_messages[0])):
-                        sensor_type = str(int(float(dev_messages[0][i]["measurementId"])))
+                    for i in range(len(dev_messages)):
+                        sensor_type = str(int(float(dev_messages[i]["measurementId"])))
                         sensor_type = measurement_pair.get(sensor_type)
-                        if("measurementValue" not in dev_messages[0][i]):
+                        if("measurementValue" not in dev_messages[i]):
                             pass
-                        new_state = dev_messages[0][i]["measurementValue"]
+                        new_state = dev_messages[i]["measurementValue"]
 
                         new_sensor = MySensor(hass, new_device, sensor_type)
                         new_sensor._state = new_state
@@ -120,12 +118,12 @@ async def async_setup_entry(
 
                 _LOGGER.info(f"entities:{entities}")
                 _LOGGER.info(f"devices_eui:{devices_eui}")
-                for i in range(len(dev_messages[0])):
-                    sensor_type = str(int(float(dev_messages[0][i]["measurementId"])))
+                for i in range(len(dev_messages)):
+                    sensor_type = str(int(float(dev_messages[i]["measurementId"])))
                     sensor_type = measurement_pair.get(sensor_type)
-                    if("measurementValue" not in dev_messages[0][i]):
+                    if("measurementValue" not in dev_messages[i]):
                         pass
-                    new_state = dev_messages[0][i]["measurementValue"]
+                    new_state = dev_messages[i]["measurementValue"]
                     
                     for dev_eui in devices_eui:
                         if dev_eui not in entities:
@@ -142,11 +140,15 @@ async def async_setup_entry(
             finally:
                 message_queue.task_done()
 
-    def count_nested_lists(data):
+    def flatten_nested_list(data):
+        result = []
         if isinstance(data, list):
-            return sum(count_nested_lists(item) for item in data)
+            for item in data:
+                result.extend(flatten_nested_list(item))
         else:
-            return 1
+            result.append(data)
+        return result
+
 
 
     async def get_sensor_entity_ids(hass):
