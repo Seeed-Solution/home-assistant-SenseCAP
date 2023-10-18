@@ -65,9 +65,9 @@ async def async_setup_entry(
                 # 判断payload关键字
                 if "deviceInfo" not in payload:
                     return
-                # 根据devEui来判断设备是否来自SenseCAP
-                if payload["deviceInfo"]["devEui"][:6] != "2cf7f1":
-                    return 
+                # # 根据devEui来判断设备是否来自SenseCAP
+                # if payload["deviceInfo"]["devEui"][:6] != "2cf7f1":
+                #     return 
 
                 dev_eui = payload["deviceInfo"]["devEui"]
                 _LOGGER.info(len(payload["object"]["messages"]))
@@ -81,6 +81,11 @@ async def async_setup_entry(
                     dev_messages = []
 
                 _LOGGER.info(dev_messages)
+                num_of_brackets = count_nested_lists(dev_messages)
+                _LOGGER.info(num_of_brackets)
+                if num_of_brackets == 1:
+                    dev_messages = [dev_messages]
+
 
                 # 检查设备是否存在
                 if dev_eui not in devices_eui:
@@ -137,6 +142,11 @@ async def async_setup_entry(
             finally:
                 message_queue.task_done()
 
+    def count_nested_lists(data):
+        if isinstance(data, list):
+            return sum(count_nested_lists(item) for item in data)
+        else:
+            return 1
 
 
     async def get_sensor_entity_ids(hass):
