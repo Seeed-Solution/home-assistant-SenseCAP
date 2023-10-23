@@ -5,7 +5,7 @@
 
 [HACS](https://hacs.xyz/) > Integrations > Plus > **Seeed Studio-SenseCAP** > Install
 
-Or manually copy `Seeed Studio-SenseCAP` folder from [latest release](https://github.com/Seeed-Solution/home-assistant-SenseCAP/releases/latest) to `/config/custom_components` folder.
+Or manually copy `sensecap` folder from [latest release](https://github.com/Seeed-Solution/home-assistant-SenseCAP/releases/latest) to `/config/custom_components` folder.
 
 ## Configuration
 
