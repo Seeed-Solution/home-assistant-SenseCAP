@@ -4,6 +4,8 @@
 ## Tutorial
 Wiki Link：[https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/](https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/)
 
+<img src=https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.png>
+
 ## Installation
 
 [HACS](https://hacs.xyz/) > Integrations > Plus > **Seeed Studio-SenseCAP** > Install
