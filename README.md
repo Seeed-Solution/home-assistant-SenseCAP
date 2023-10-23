@@ -1,6 +1,9 @@
 # The home-assistant integration for SenseCAP LoRaWAN sensors
 <img src=https://raw.githubusercontent.com/Seeed-Solution/home-assistant-SenseCAP/main/icon.png>
 
+## Tutorial
+Wiki Link：[https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/](https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/)
+
 ## Installation
 
 [HACS](https://hacs.xyz/) > Integrations > Plus > **Seeed Studio-SenseCAP** > Install
