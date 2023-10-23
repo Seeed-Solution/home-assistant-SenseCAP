@@ -5,7 +5,7 @@
   "config_flow": true,
   "dependencies": ["mqtt"],
   "documentation": "https://github.com/Seeed-Solution/home-assistant-SenseCAP",
-  "issue_tracker": "",
+  "issue_tracker": "https://github.com/Seeed-Solution/home-assistant-SenseCAP/issues",
   "iot_class": "local_push",
   "requirements": [],
   "version": "1.0"
