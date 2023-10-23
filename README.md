@@ -1,11 +1,6 @@
 # The home-assistant integration for SenseCAP LoRaWAN sensors
 <img src=https://raw.githubusercontent.com/Seeed-Solution/home-assistant-SenseCAP/main/icon.png>
 
-## Tutorial
-Wiki Link：[https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/](https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/)
-
-<img src=https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.png>
-
 ## Installation
 
 [HACS](https://hacs.xyz/) > Integrations > Plus > **Seeed Studio-SenseCAP** > Install
@@ -24,3 +19,9 @@ The intergration configuration takes only a few steps:
 2. Click **notifications** at the bottom of the left, wait for the new device identification notification to pop up, click **Check it out** to jump to the device management interface.
 
 3. Complete all configurations for the integration
+
+
+## Tutorial
+Wiki Link：[https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/](https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/)
+
+<img src=https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.png>
