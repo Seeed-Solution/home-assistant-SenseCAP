@@ -12,18 +12,44 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
+from homeassistant.components.sensor import SensorDeviceClass
 
-# measurement_pair = {
-#     '4097':'Air Temperature','4098':'Air Humidity','4099':'Light Intensity','4100':'CO2'
-#     ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan',
-#     '4190':'UV Index','4105':'Wind Speed','4104':'Wind Direction Sensor','4113':'Rain Gauge','4101':'Barometric Pressure',
-#     '4102':'Soil Temperature','4103':'Soil Moisture','4108':'Electrical Conductivity'
-# }
+from homeassistant.const import (
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
+    CONCENTRATION_PARTS_PER_BILLION,
+    CONCENTRATION_PARTS_PER_MILLION,
+    LIGHT_LUX,
+    PERCENTAGE,
+    POWER_VOLT_AMPERE_REACTIVE,
+    SIGNAL_STRENGTH_DECIBELS,
+    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    UnitOfApparentPower,
+    UnitOfDataRate,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfFrequency,
+    UnitOfInformation,
+    UnitOfIrradiance,
+    UnitOfLength,
+    UnitOfMass,
+    UnitOfPower,
+    UnitOfPrecipitationDepth,
+    UnitOfPressure,
+    UnitOfSoundPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+    UnitOfTime,
+    UnitOfVolume,
+    UnitOfVolumetricFlux,
+)
+
 from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_ILLUMINANCE,
     DEVICE_CLASS_CO2,
+    DEVICE_CLASS_BATTERY
 )
 
 DEFAULT_PORT = 1883
@@ -215,9 +241,25 @@ class MySensor(Entity):
         self._id = f"{device._id}_{sensor_type}"
         self._name = f"{device._id}_{sensor_type}"
         self._state = None
+
         self.sensor_id =sensor_id
+
+        if sensor_id == "3000":
+            self._attr_device_class = DEVICE_CLASS_BATTERY
+        elif self.sensor_id == '4097' or self.sensor_id == '4102':
+            self._attr_device_class = DEVICE_CLASS_TEMPERATURE
+        elif self.sensor_id == '4098' or self.sensor_id == '4103':
+            self._attr_device_class = DEVICE_CLASS_HUMIDITY
+        elif self.sensor_id == '4099' or self.sensor_id == '4193' or self.sensor_id == '4199':
+            self._attr_device_class = DEVICE_CLASS_ILLUMINANCE
+        elif self.sensor_id == '4100':
+            self._attr_device_class = DEVICE_CLASS_CO2  
+
+        else:
+            self._attr_icon = sensor_icon
+        
         self._attr_unit_of_measurement = sensor_unit
-        self._attr_icon = sensor_icon
+        
 
     @property
     def unique_id(self):
