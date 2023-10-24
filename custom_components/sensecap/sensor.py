@@ -13,6 +13,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
 
+# measurement_pair = {
+#     '4097':'Air Temperature','4098':'Air Humidity','4099':'Light Intensity','4100':'CO2'
+#     ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan',
+#     '4190':'UV Index','4105':'Wind Speed','4104':'Wind Direction Sensor','4113':'Rain Gauge','4101':'Barometric Pressure',
+#     '4102':'Soil Temperature','4103':'Soil Moisture','4108':'Electrical Conductivity'
+# }
 from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_HUMIDITY,
@@ -201,7 +207,6 @@ class MyDevice(Entity):
         }
 
 class MySensor(Entity):
-    _attr_icon = "mdi:devices"
     def __init__(self, hass, device, sensor_id, sensor_type, sensor_unit, sensor_icon):
         """初始化传感器."""
         super().__init__()
@@ -213,15 +218,6 @@ class MySensor(Entity):
         self.sensor_id =sensor_id
         self._attr_unit_of_measurement = sensor_unit
         self._attr_icon = sensor_icon
-
-        if self.sensor_id == '4097' or self.sensor_id == '4102':
-            self._attr_device_class = DEVICE_CLASS_TEMPERATURE
-        elif self.sensor_id == '4098' or self.sensor_id == '4103':
-            self._attr_device_class = DEVICE_CLASS_HUMIDITY
-        elif self.sensor_id == '4099' or self.sensor_id == '4193':
-            self._attr_device_class = DEVICE_CLASS_ILLUMINANCE
-        elif self.sensor_id == '4100':
-            self._attr_device_class = DEVICE_CLASS_CO2  
 
     @property
     def unique_id(self):
@@ -240,6 +236,7 @@ class MySensor(Entity):
     
     async def async_update(self):
         pass
+
 
     @property
     def device_info(self):
