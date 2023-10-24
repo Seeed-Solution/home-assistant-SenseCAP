@@ -13,15 +13,19 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
 
-measurement_pair = {
-    '4097':'Air Temperature','4098':'Air Humidity','4099':'Light Intensity','4100':'CO2'
-    ,'4200':'Event Status','4197':'Longitude','4198':'Latitude','4199':'Light','3000':'Battery','5100':'Wi-Fi Scan',
-    '4190':'UV Index','4105':'Wind Speed','4104':'Wind Direction Sensor','4113':'Rain Gauge','4101':'Barometric Pressure',
-    '4102':'Soil Temperature','4103':'Soil Moisture','4108':'Electrical Conductivity'
-}
+from homeassistant.const import (
+    DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_HUMIDITY,
+    DEVICE_CLASS_ILLUMINANCE,
+    DEVICE_CLASS_CO2,
+)
+
 DEFAULT_PORT = 1883
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    MEASUREMENT_DICT
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -100,13 +104,16 @@ async def async_setup_entry(
                     devices_eui.append(dev_eui)
                     # 创建实体并状态赋值
                     for i in range(len(dev_messages)):
-                        sensor_type = str(int(float(dev_messages[i]["measurementId"])))
-                        sensor_type = measurement_pair.get(sensor_type)
+                        sensor_id = str(int(float(dev_messages[i]["measurementId"])))
+                        measurement_info = MEASUREMENT_DICT[sensor_id]
+                        sensor_type = measurement_info[0]
+                        sensor_unit = measurement_info[1]
+                        sensor_icon = measurement_info[2]
                         if("measurementValue" not in dev_messages[i]):
                             pass
                         new_state = dev_messages[i]["measurementValue"]
 
-                        new_sensor = MySensor(hass, new_device, sensor_type)
+                        new_sensor = MySensor(hass, new_device, sensor_id, sensor_type, sensor_unit, sensor_icon)
                         new_sensor._state = new_state
 
                         if dev_eui not in entities:
@@ -119,8 +126,10 @@ async def async_setup_entry(
                 _LOGGER.info(f"entities:{entities}")
                 _LOGGER.info(f"devices_eui:{devices_eui}")
                 for i in range(len(dev_messages)):
-                    sensor_type = str(int(float(dev_messages[i]["measurementId"])))
-                    sensor_type = measurement_pair.get(sensor_type)
+                    sensor_id = str(int(float(dev_messages[i]["measurementId"])))
+                    measurement_info = MEASUREMENT_DICT[sensor_id]
+                    sensor_type = measurement_info[0]
+                    # sensor_unit = measurement_info[1]
                     if("measurementValue" not in dev_messages[i]):
                         pass
                     new_state = dev_messages[i]["measurementValue"]
@@ -193,7 +202,7 @@ class MyDevice(Entity):
 
 class MySensor(Entity):
     _attr_icon = "mdi:devices"
-    def __init__(self, hass, device, sensor_type):
+    def __init__(self, hass, device, sensor_id, sensor_type, sensor_unit, sensor_icon):
         """初始化传感器."""
         super().__init__()
         self.hass = hass
@@ -201,6 +210,18 @@ class MySensor(Entity):
         self._id = f"{device._id}_{sensor_type}"
         self._name = f"{device._id}_{sensor_type}"
         self._state = None
+        self.sensor_id =sensor_id
+        self._attr_unit_of_measurement = sensor_unit
+        self._attr_icon = sensor_icon
+
+        if self.sensor_id == '4097' or self.sensor_id == '4102':
+            self._attr_device_class = DEVICE_CLASS_TEMPERATURE
+        elif self.sensor_id == '4098' or self.sensor_id == '4103':
+            self._attr_device_class = DEVICE_CLASS_HUMIDITY
+        elif self.sensor_id == '4099' or self.sensor_id == '4193':
+            self._attr_device_class = DEVICE_CLASS_ILLUMINANCE
+        elif self.sensor_id == '4100':
+            self._attr_device_class = DEVICE_CLASS_CO2  
 
     @property
     def unique_id(self):
