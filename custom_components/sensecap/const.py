@@ -13,7 +13,7 @@ MEASUREMENT_DICT = {
     "4098": [
         "Air Humidity",
         "% RH",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4099": [
         "Light Intensity",
@@ -38,7 +38,7 @@ MEASUREMENT_DICT = {
     "4103": [
         "Soil Moisture",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4104": [
         "Wind Direction",
@@ -63,17 +63,17 @@ MEASUREMENT_DICT = {
     "4108": [
         "Electrical Conductivity",
         "mS/cm",
-        ""
+        "mdi:devices"
     ],
     "4109": [
         "Dissolved Oxygen",
         "mg/L",
-        ""
+        "mdi:devices"
     ],
     "4110": [
         "Soil Volumetric Water Content",
         "%",
-        ""
+        "mdi:devices"
     ],
     "4111": [
         "Soil Electrical Conductivity",
@@ -198,27 +198,27 @@ MEASUREMENT_DICT = {
     "4137": [
         "Leaf Wetness",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4138": [
         "Soil Moisture-10cm",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4139": [
         "Soil Moisture-20cm",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4140": [
         "Soil Moisture-30cm",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4141": [
         "Soil Moisture-40cm",
         "%",
-        "mdi:water-percent-alert"
+        "mdi:water-percent"
     ],
     "4142": [
         "Soil Temperature-10cm",
