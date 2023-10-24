@@ -529,5 +529,10 @@ MEASUREMENT_DICT = {
         "Switch",
         "",
         "mdi:toggle-switch"
-    ]
+    ],
+    "3000": [
+        "Battery",
+        "",
+        "mdi:battery"
+    ],
 }
