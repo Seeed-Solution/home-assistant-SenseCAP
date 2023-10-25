@@ -5,6 +5,16 @@ CONF_COMMAND_TOPIC = "command_topic"
 
 
 MEASUREMENT_DICT = {
+    "1": [
+        "Measurement 1",
+        "",
+        "mdi:devices"
+    ],
+    "2": [
+        "Measurement 2",
+        "",
+        "mdi:devices"
+    ],
     "4097": [
         "Air Temperature",
         "℃",
