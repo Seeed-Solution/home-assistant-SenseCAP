@@ -142,6 +142,9 @@ async def async_setup_entry(
                                 entity._state = new_state
                                 entity.async_schedule_update_ha_state()
 
+                if hass.data[DOMAIN]["mqtt_client"] == 0:
+                    client.loop_stop()
+
             except Exception as e:
                 _LOGGER.error("处理 MQTT 消息时出错：%s", str(e))
             finally:
