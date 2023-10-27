@@ -15,36 +15,6 @@ from homeassistant.components import persistent_notification
 from homeassistant.components.sensor import SensorDeviceClass
 
 from homeassistant.const import (
-    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
-    CONCENTRATION_PARTS_PER_BILLION,
-    CONCENTRATION_PARTS_PER_MILLION,
-    LIGHT_LUX,
-    PERCENTAGE,
-    POWER_VOLT_AMPERE_REACTIVE,
-    SIGNAL_STRENGTH_DECIBELS,
-    SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-    UnitOfApparentPower,
-    UnitOfDataRate,
-    UnitOfElectricCurrent,
-    UnitOfElectricPotential,
-    UnitOfEnergy,
-    UnitOfFrequency,
-    UnitOfInformation,
-    UnitOfIrradiance,
-    UnitOfLength,
-    UnitOfMass,
-    UnitOfPower,
-    UnitOfPrecipitationDepth,
-    UnitOfPressure,
-    UnitOfSoundPressure,
-    UnitOfSpeed,
-    UnitOfTemperature,
-    UnitOfTime,
-    UnitOfVolume,
-    UnitOfVolumetricFlux,
-)
-
-from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_ILLUMINANCE,
@@ -66,13 +36,14 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    mqtt_topic = hass.data.setdefault(DOMAIN, {})["mqtt_topic"]
-    entities = hass.data.setdefault(DOMAIN, {})["entities"]
-    devices_eui = hass.data.setdefault(DOMAIN, {})["dev_eui"]
+    data = hass.data[DOMAIN][config_entry.entry_id]
+    mqtt_topic = data.get("command_topic")
+    mqtt_host = data.get("host")
+    username = data.get("username")
+    password = data.get("password")
 
-    mqtt_host = hass.data.setdefault(DOMAIN, {})["mqtt_host"]
-    username = hass.data.setdefault(DOMAIN, {})["user_name"]
-    password = hass.data.setdefault(DOMAIN, {})["user_passwd"]
+    entities = {}
+    devices_eui = []
 
     message_queue = asyncio.Queue()
 
@@ -103,12 +74,8 @@ async def async_setup_entry(
                 # 判断payload关键字
                 if "deviceInfo" not in payload:
                     return
-                # # 根据devEui来判断设备是否来自SenseCAP
-                # if payload["deviceInfo"]["devEui"][:6] != "2cf7f1":
-                #     return 
 
                 dev_eui = payload["deviceInfo"]["devEui"]
-                # _LOGGER.info(len(payload["object"]["messages"]))
 
                 if len(payload["object"]["messages"]) > 1:
                     messages = payload["object"]["messages"]
@@ -132,10 +99,11 @@ async def async_setup_entry(
                         f"[Check it out](/config/integrations/integration/sensecap)",
                         "SenseCAP"
                         )
-                    new_device = MyDevice(hass, dev_eui)
                     devices_eui.append(dev_eui)
                     # 创建实体并状态赋值
                     for i in range(len(dev_messages)):
+                        if("measurementId" not in dev_messages[i]):
+                            pass
                         sensor_id = str(int(float(dev_messages[i]["measurementId"])))
                         measurement_info = MEASUREMENT_DICT[sensor_id]
                         sensor_type = measurement_info[0]
@@ -145,36 +113,34 @@ async def async_setup_entry(
                             pass
                         new_state = dev_messages[i]["measurementValue"]
 
-                        new_sensor = MySensor(hass, new_device, sensor_id, sensor_type, sensor_unit, sensor_icon)
+                        new_sensor = MySensor(hass, dev_eui, sensor_id, sensor_type, sensor_unit, sensor_icon)
                         new_sensor._state = new_state
 
                         if dev_eui not in entities:
                             entities[dev_eui] = {}
 
                         # 将实体连同设备信息放入实体中，方便后续更新状态
-                        async_add_entities([new_sensor])
+                        async_add_entities([new_sensor], update_before_add=True)
                         entities[dev_eui][sensor_type] = new_sensor
 
                 _LOGGER.info(f"entities:{entities}")
                 _LOGGER.info(f"devices_eui:{devices_eui}")
                 for i in range(len(dev_messages)):
+                    if("measurementId" not in dev_messages[i]):
+                        pass
                     sensor_id = str(int(float(dev_messages[i]["measurementId"])))
                     measurement_info = MEASUREMENT_DICT[sensor_id]
                     sensor_type = measurement_info[0]
-                    # sensor_unit = measurement_info[1]
                     if("measurementValue" not in dev_messages[i]):
                         pass
                     new_state = dev_messages[i]["measurementValue"]
                     
-                    for dev_eui in devices_eui:
-                        if dev_eui not in entities:
-                            devices_eui.remove(dev_eui)
-                            pass
-
-                        if sensor_type in entities[dev_eui]:
-                            entity = entities[dev_eui][sensor_type]
-                            entity._state = new_state
-                            entity.async_schedule_update_ha_state()
+                    for dev in entities:
+                        if dev == dev_eui:
+                            if sensor_type in entities[dev_eui]:
+                                entity = entities[dev_eui][sensor_type]
+                                entity._state = new_state
+                                entity.async_schedule_update_ha_state()
 
             except Exception as e:
                 _LOGGER.error("处理 MQTT 消息时出错：%s", str(e))
@@ -197,50 +163,20 @@ async def async_setup_entry(
         return sensor_entity_ids
 
     asyncio.create_task(message_consumer())
-    # await hass.components.mqtt.async_subscribe(mqtt_topic, message_received)
 
     return True
 
 
-class MyDevice(Entity):
-    def __init__(self, hass, dev_eui):
-        """初始化设备."""
-        super().__init__()
-        self.hass = hass
-        self._id = dev_eui
-        self._name = f"{dev_eui}"
-        self._state = {}
-
-    @property
-    def unique_id(self):
-        """返回用于此设备的唯一ID."""
-        return self._id
-
-    @property
-    def name(self):
-        """返回设备的名称."""
-        return self._name
-
-    @property
-    def device_info(self):
-        """Information about this entity/device."""
-        return {
-            "identifiers": {(DOMAIN, self._id)},
-            "name": self._name,
-            "sw_version": "1.0",
-            "model": "SenseCAP",
-            "manufacturer": "SenseCAP",
-        }
-
 class MySensor(Entity):
-    def __init__(self, hass, device, sensor_id, sensor_type, sensor_unit, sensor_icon):
+    def __init__(self, hass, dev_eui, sensor_id, sensor_type, sensor_unit, sensor_icon):
         """初始化传感器."""
         super().__init__()
         self.hass = hass
-        self.device = device
-        self._id = f"{device._id}_{sensor_type}"
-        self._name = f"{device._id}_{sensor_type}"
+        self.device = dev_eui
+        self._id = f"{self.device}_{sensor_type}"
+        self._name = f"{self.device}_{sensor_type}"
         self._state = None
+
 
         self.sensor_id =sensor_id
 
@@ -260,6 +196,7 @@ class MySensor(Entity):
         
         self._attr_unit_of_measurement = sensor_unit
         
+    
 
     @property
     def unique_id(self):
@@ -284,12 +221,9 @@ class MySensor(Entity):
     def device_info(self):
         """Information about this entity/device."""
         return {
-            "identifiers": {(DOMAIN, self.device._id)},
-            "name": self.device._name,
+            "identifiers": {(DOMAIN, self.device)},
+            "name": self.device,
             "sw_version": "1.0",
             "model": "SenseCAP",
             "manufacturer": "SenseCAP",
         }
-
-
-
