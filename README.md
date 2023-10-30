@@ -24,4 +24,4 @@ The intergration configuration takes only a few steps:
 ## Tutorial
 Wiki Link：[https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/](https://wiki.seeedstudio.com/Network/SenseCAP_Network/SenseCAP_M2_Multi_Platform/Home_Assistant/)
 
-<img src=https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.png>
+<img src=https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.jpg>
