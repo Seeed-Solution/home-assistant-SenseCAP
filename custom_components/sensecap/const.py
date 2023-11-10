@@ -15,6 +15,46 @@ MEASUREMENT_DICT = {
         "",
         "mdi:devices"
     ],
+    "3": [
+        "Measurement 3",
+        "",
+        "mdi:devices"
+    ],
+    "4": [
+        "Measurement 4",
+        "",
+        "mdi:devices"
+    ],
+    "5": [
+        "Measurement 5",
+        "",
+        "mdi:devices"
+    ],
+    "6": [
+        "Measurement 6",
+        "",
+        "mdi:devices"
+    ],
+    "7": [
+        "Measurement 7",
+        "",
+        "mdi:devices"
+    ],
+    "8": [
+        "Measurement 8",
+        "",
+        "mdi:devices"
+    ],
+    "9": [
+        "Measurement 9",
+        "",
+        "mdi:devices"
+    ],
+    "10": [
+        "Measurement 10",
+        "",
+        "mdi:devices"
+    ],
     "4097": [
         "Air Temperature",
         "℃",
