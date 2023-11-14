@@ -16,6 +16,7 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 # PLATFORMS: list[str] = ["sensor", "switch"]
+
 PLATFORMS: list[str] = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -23,7 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     data = dict(entry.data)
     hass.data[DOMAIN][entry.entry_id] = data
     hass.data[DOMAIN]["mqtt_client"] = 1
-    
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
