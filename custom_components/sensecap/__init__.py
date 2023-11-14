@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import json
-from homeassistant.components import mqtt
+import concurrent.futures
+import logging
+import re
+import asyncio
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-import logging
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+# PLATFORMS: list[str] = ["sensor", "switch"]
 PLATFORMS: list[str] = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -27,6 +31,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
-        hass.data[DOMAIN]["mqtt_client"] = 0
+        hass.data[DOMAIN].pop("mqtt_client")
 
     return unload_ok
+
