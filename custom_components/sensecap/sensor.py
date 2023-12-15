@@ -72,8 +72,8 @@ async def async_setup_entry(
                 payload = json.loads(payload)
                 existing_entities = await get_sensor_entity_ids(hass)
                 # 判断payload关键字
-                if "deviceInfo" not in payload:
-                    return
+                if "deviceInfo" and "object" not in payload:
+                    continue
 
                 dev_eui = payload["deviceInfo"]["devEui"]
 
@@ -90,49 +90,51 @@ async def async_setup_entry(
                 _LOGGER.info((dev_messages))
                 # # 检查设备是否存在
                 if dev_eui not in devices_eui:
-                    _LOGGER.info(f"Creating new device with dev_eui: {dev_eui}")
-                    #发送通知
-                    persistent_notification.async_create(
-                        hass,
-                        f"New devices discovered！ \n" +
-                        f"Device EUI： {dev_eui} \n" + 
-                        f"[Check it out](/config/integrations/integration/sensecap)",
-                        "SenseCAP"
-                        )
-                    devices_eui.append(dev_eui)
-                    # 创建实体并状态赋值
-                    for i in range(len(dev_messages)):
-                        if("measurementId" not in dev_messages[i]):
-                            pass
-                        sensor_id = str(int(float(dev_messages[i]["measurementId"])))
-                        measurement_info = MEASUREMENT_DICT[sensor_id]
-                        sensor_type = measurement_info[0]
-                        sensor_unit = measurement_info[1]
-                        sensor_icon = measurement_info[2]
-                        if("measurementValue" not in dev_messages[i]):
-                            pass
-                        new_state = dev_messages[i]["measurementValue"]
+                    contains_measurement = check_messages(dev_messages)
+                    if contains_measurement:
+                        _LOGGER.info(f"Creating new device with dev_eui: {dev_eui}")
+                        #发送通知
+                        persistent_notification.async_create(
+                            hass,
+                            f"New devices discovered！ \n" +
+                            f"Device EUI： {dev_eui} \n" + 
+                            f"[Check it out](/config/integrations/integration/sensecap)",
+                            "SenseCAP"
+                            )
+                        devices_eui.append(dev_eui)
+                        # 创建实体并状态赋值
+                        for i in range(len(dev_messages)):
+                            # if("measurementId" not in dev_messages[i]):
+                            #     continue
+                            sensor_id = str(int(float(dev_messages[i]["measurementId"])))
+                            measurement_info = MEASUREMENT_DICT[sensor_id]
+                            sensor_type = measurement_info[0]
+                            sensor_unit = measurement_info[1]
+                            sensor_icon = measurement_info[2]
+                            # if("measurementValue" not in dev_messages[i]):
+                            #     continue
+                            new_state = dev_messages[i]["measurementValue"]
 
-                        new_sensor = MySensor(hass, dev_eui, sensor_id, sensor_type, sensor_unit, sensor_icon)
-                        new_sensor._state = new_state
+                            new_sensor = MySensor(hass, dev_eui, sensor_id, sensor_type, sensor_unit, sensor_icon)
+                            new_sensor._state = new_state
 
-                        if dev_eui not in entities:
-                            entities[dev_eui] = {}
+                            if dev_eui not in entities:
+                                entities[dev_eui] = {}
 
-                        # 将实体连同设备信息放入实体中，方便后续更新状态
-                        async_add_entities([new_sensor], update_before_add=True)
-                        entities[dev_eui][sensor_type] = new_sensor
+                            # 将实体连同设备信息放入实体中，方便后续更新状态
+                            async_add_entities([new_sensor], update_before_add=True)
+                            entities[dev_eui][sensor_type] = new_sensor
 
                 _LOGGER.info(f"entities:{entities}")
                 _LOGGER.info(f"devices_eui:{devices_eui}")
                 for i in range(len(dev_messages)):
                     if("measurementId" not in dev_messages[i]):
-                        pass
+                        continue
                     sensor_id = str(int(float(dev_messages[i]["measurementId"])))
                     measurement_info = MEASUREMENT_DICT[sensor_id]
                     sensor_type = measurement_info[0]
                     if("measurementValue" not in dev_messages[i]):
-                        pass
+                        continue
                     new_state = dev_messages[i]["measurementValue"]
                     
                     for dev in entities:
@@ -159,7 +161,11 @@ async def async_setup_entry(
             result.append(data)
         return result
 
-
+    def check_messages(messages):
+        for message in messages:
+            if "measurementId" in message or "measurementValue" in message:
+                return True
+        return False
 
     async def get_sensor_entity_ids(hass):
         sensor_entity_ids = hass.states.async_entity_ids("sensor")
