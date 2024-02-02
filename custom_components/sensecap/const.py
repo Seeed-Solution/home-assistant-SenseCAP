@@ -585,4 +585,9 @@ MEASUREMENT_DICT = {
         "",
         "mdi:battery"
     ],
+    "3576": [
+        "Positioning Status",
+        "",
+        "mdi:map-marker"
+    ],
 }
