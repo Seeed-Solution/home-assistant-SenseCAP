@@ -14,6 +14,8 @@
 # from homeassistant.components import persistent_notification
 # from homeassistant.components.sensor import SensorDeviceClass
 
+# from .hub import process_mqtt_payload, flatten_nested_list
+
 # from homeassistant.const import (
 #     DEVICE_CLASS_TEMPERATURE,
 #     DEVICE_CLASS_HUMIDITY,
@@ -76,17 +78,8 @@
 #                 # 判断payload关键字
 #                 if "deviceInfo" not in payload:
 #                     continue
-
-#                 dev_eui = payload["deviceInfo"]["devEui"]
-
-#                 if len(payload["object"]["messages"]) > 1:
-#                     messages = payload["object"]["messages"]
-#                     dev_messages = [messages]
-#                 elif len(payload["object"]["messages"]) == 1:
-#                     dev_messages = payload["object"]["messages"]
-#                 else:
-#                     dev_messages = []
-
+#                 dev_eui, dev_messages = process_mqtt_payload(payload)
+#
 #                 dev_messages = flatten_nested_list(dev_messages)
 #                 _LOGGER.info(len(dev_messages))
 #                 _LOGGER.info((dev_messages))

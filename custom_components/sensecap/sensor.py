@@ -22,6 +22,8 @@ from homeassistant.const import (
     DEVICE_CLASS_BATTERY
 )
 
+from .hub import process_mqtt_payload, flatten_nested_list
+
 DEFAULT_PORT = 1883
 
 from .const import (
@@ -72,18 +74,11 @@ async def async_setup_entry(
                 payload = json.loads(payload)
                 existing_entities = await get_sensor_entity_ids(hass)
                 # 判断payload关键字
-                if "deviceInfo" and "object" not in payload:
+
+                dev_eui, dev_messages = process_mqtt_payload(payload)
+
+                if dev_eui is None:
                     continue
-
-                dev_eui = payload["deviceInfo"]["devEui"]
-
-                if len(payload["object"]["messages"]) > 1:
-                    messages = payload["object"]["messages"]
-                    dev_messages = [messages]
-                elif len(payload["object"]["messages"]) == 1:
-                    dev_messages = payload["object"]["messages"]
-                else:
-                    dev_messages = []
 
                 dev_messages = flatten_nested_list(dev_messages)
                 _LOGGER.info(len(dev_messages))
@@ -100,7 +95,7 @@ async def async_setup_entry(
                             f"Device EUI： {dev_eui} \n" + 
                             f"[Check it out](/config/integrations/integration/sensecap)",
                             "SenseCAP"
-                            )
+                        )
                         devices_eui.append(dev_eui)
                         # 创建实体并状态赋值
                         for i in range(len(dev_messages)):
@@ -136,7 +131,7 @@ async def async_setup_entry(
                     if("measurementValue" not in dev_messages[i]):
                         continue
                     new_state = dev_messages[i]["measurementValue"]
-                    
+
                     for dev in entities:
                         if dev == dev_eui:
                             if sensor_type in entities[dev_eui]:
@@ -151,15 +146,6 @@ async def async_setup_entry(
                 _LOGGER.error("处理 MQTT 消息时出错：%s", str(e))
             finally:
                 message_queue.task_done()
-
-    def flatten_nested_list(data):
-        result = []
-        if isinstance(data, list):
-            for item in data:
-                result.extend(flatten_nested_list(item))
-        else:
-            result.append(data)
-        return result
 
     def check_messages(messages):
         for message in messages:
@@ -198,14 +184,14 @@ class MySensor(Entity):
         elif self.sensor_id == '4099' or self.sensor_id == '4193' or self.sensor_id == '4199':
             self._attr_device_class = DEVICE_CLASS_ILLUMINANCE
         elif self.sensor_id == '4100':
-            self._attr_device_class = DEVICE_CLASS_CO2  
+            self._attr_device_class = DEVICE_CLASS_CO2
 
         else:
             self._attr_icon = sensor_icon
-        
+
         self._attr_unit_of_measurement = sensor_unit
-        
-    
+
+
 
     @property
     def unique_id(self):
@@ -221,7 +207,7 @@ class MySensor(Entity):
     def state(self):
         """返回传感器的状态."""
         return self._state
-    
+
     async def async_update(self):
         pass
 
