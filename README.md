@@ -38,7 +38,7 @@ Effortlessly integrate Seeed Studio-SenseCAP sensors into your Home Assistant se
 
 ## Tutorial Documentation
 
-For a detailed walkthrough and advanced configurations, visit our [Wiki page](https://wiki.seeedstudio.com/home_assistant_sensecap/).
+For a detailed walkthrough and advanced configurations, visit our [Wiki page](https://wiki.seeedstudio.com/home_assistant_sensecap/) or [this page](https://wiki.seeedstudio.com/connect_vision_ai_v2_to_ha/#installing-the-hacs-plugin).
 
 ![SenseCAP M2 with Home Assistant](https://files.seeedstudio.com/wiki/IMAGES/SenseCAP/M2_homeassistant/overview.jpg)
 
