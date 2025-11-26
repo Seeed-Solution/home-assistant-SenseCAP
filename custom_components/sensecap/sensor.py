@@ -14,14 +14,6 @@ from homeassistant.helpers import service
 from homeassistant.components import persistent_notification
 from homeassistant.components.sensor import SensorDeviceClass
 
-from homeassistant.const import (
-    DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_ILLUMINANCE,
-    DEVICE_CLASS_CO2,
-    DEVICE_CLASS_BATTERY
-)
-
 from .hub import process_mqtt_payload, flatten_nested_list
 
 DEFAULT_PORT = 1883
@@ -176,15 +168,15 @@ class MySensor(Entity):
         self.sensor_id =sensor_id
 
         if sensor_id == "3000":
-            self._attr_device_class = DEVICE_CLASS_BATTERY
+            self._attr_device_class = SensorDeviceClass.BATTERY
         elif self.sensor_id == '4097' or self.sensor_id == '4102':
-            self._attr_device_class = DEVICE_CLASS_TEMPERATURE
+            self._attr_device_class = SensorDeviceClass.TEMPERATURE
         elif self.sensor_id == '4098' or self.sensor_id == '4103':
-            self._attr_device_class = DEVICE_CLASS_HUMIDITY
+            self._attr_device_class = SensorDeviceClass.HUMIDITY
         elif self.sensor_id == '4099' or self.sensor_id == '4193' or self.sensor_id == '4199':
-            self._attr_device_class = DEVICE_CLASS_ILLUMINANCE
+            self._attr_device_class = SensorDeviceClass.ILLUMINANCE
         elif self.sensor_id == '4100':
-            self._attr_device_class = DEVICE_CLASS_CO2
+            self._attr_device_class = SensorDeviceClass.CO2
 
         else:
             self._attr_icon = sensor_icon
